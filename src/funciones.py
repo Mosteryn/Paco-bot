@@ -3,18 +3,10 @@ import configparser
 import subprocess
 import time
 import psutil
+import sqlite3
 config = configparser.ConfigParser()
 config.read('src/parametros/archivo_parametros.ini')
 
-proceso1 = "botMusica.py"
-proceso2 = "SpeedChat.py"
-proceso3 = "bot_Comandos.py"
-p1 = None
-p2 = None
-p3 = None
-config.set('parametro', 'autoplay', 'False')
-config.set('parametro','pausa','False')
-config.set('parametro', 'stop', 'False')
 config.set('parametro','onoff_speed','false')
 config.set('parametro','onoff_comandos','false')
 
@@ -33,6 +25,68 @@ def volumenC(valor):
         config.set('parametro', 'volumenc', valor)
         with open('src/parametros/archivo_parametros.ini', 'w') as archivo_parametros:
             config.write(archivo_parametros)
+def CargarVolumenC():
+    try:
+        sqliteConnection = sqlite3.connect('commands.db')
+        cursor = sqliteConnection.cursor()
+
+        sqlite_select_query = """SELECT volumenc FROM parametros"""
+        cursor.execute(sqlite_select_query)
+        records = cursor.fetchall()
+        for row in records:
+            valor = int(row[0])
+            return valor
+        
+    except sqlite3.Error as error:
+        print("Failed to read data from sqlite table", error)
+    finally:
+        if sqliteConnection:
+            sqliteConnection.close()
+def cargarVolumenS():
+    try:
+        sqliteConnection = sqlite3.connect('commands.db')
+        cursor = sqliteConnection.cursor()
+        sqlite_select_query = """SELECT volumens FROM `parametros`"""
+        cursor.execute(sqlite_select_query)
+        records = cursor.fetchall()
+        for row in records:
+            valor = int(row[0])
+            return  valor
+    except sqlite3.Error as error:
+        print("Failed to read data from sqlite table", error)
+    finally:
+        if sqliteConnection:
+            sqliteConnection.close()
+def editVolumenC(valor):
+    try:
+        sqliteConnection = sqlite3.connect('commands.db')
+        cursor = sqliteConnection.cursor()
+
+        cursor.execute('UPDATE parametros SET volumenc = ? ',(valor,))
+        sqliteConnection.commit()
+        cursor.close()
+
+    except sqlite3.Error as error:
+        print("Failed to update sqlite table", error)
+    finally:
+        if sqliteConnection:
+            sqliteConnection.close()
+def editVolumenS(valor):
+    try:
+        sqliteConnection = sqlite3.connect('commands.db')
+        cursor = sqliteConnection.cursor()
+
+
+        cursor.execute('UPDATE parametros SET volumens = ? ',(valor,))
+        sqliteConnection.commit()
+        cursor.close()
+
+    except sqlite3.Error as error:
+        print("Failed to update sqlite table", error)
+    finally:
+        if sqliteConnection:
+            sqliteConnection.close()
+
 def Skip():
         config.read('src/parametros/archivo_parametros.ini')
         config.set('parametro', 'stop', 'True')

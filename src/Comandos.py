@@ -42,59 +42,96 @@ class CommandApp:
         
         # Frame principal
         main_frame = ttk.Frame(root)
-        main_frame.grid(row=0, column=0, padx=10, pady=10)
+        main_frame.pack(expand=True, fill='both')
+        main_frame.grid_rowconfigure(0, weight=0)  
+        main_frame.grid_rowconfigure(1, weight=1)  
+        main_frame.grid_columnconfigure(0, weight=0)  
+        main_frame.grid_columnconfigure(1, weight=1)  
         
-        left_frame = ttk.Frame(root)
-        left_frame.grid(row=0, column=1, padx=10, pady=10)
 
         # Sección de comandos
-        self.comandos_frame = ttk.LabelFrame(left_frame, text="Comandos")
+        self.comandos_frame = ttk.LabelFrame(main_frame, text="Comandos")
         self.comandos_frame.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
         ttk.Label(self.comandos_frame, text="Volumen").grid(row=0, column=0, padx=10, pady=10, sticky="w")
-        self.commands_volume = ttk.Scale(self.comandos_frame, from_=0, to=100, orient="horizontal", command= volumenC)
-        self.commands_volume.set(self.config.get('parametro', 'volumenc'))
+        self.commands_volume = ttk.Scale(self.comandos_frame, from_=0, to=100, orient="horizontal", command= editVolumenC)
+        self.commands_volume.set(CargarVolumenC())
         self.commands_volume.grid(row=0, column=1, padx=10, pady=10)
         self.inicio_command_button = ttk.Button(self.comandos_frame, text="Iniciar", command=self.ComandosCheck)
         self.inicio_command_button.grid(row=0, column=2, padx=10, pady=10)
 
         # Sección para agregar/editar comandos
-        self.add_command_frame = ttk.LabelFrame(left_frame, text="Agregar/Editar Comando")
-        self.add_command_frame.grid(row=2, column=1, padx=10, pady=10, sticky="ew")
+        self.add_command_frame = ttk.LabelFrame(main_frame, text="Agregar/Editar Comando")
+        self.add_command_frame.grid(row=1, column=1, padx=10, pady=10, sticky='nsew')
+
+        
 
         ttk.Label(self.add_command_frame, text="Nombre del Comando:").grid(row=0, column=0, padx=5, pady=5)
         self.name_entry = ttk.Entry(self.add_command_frame)
         self.name_entry.grid(row=0, column=1, padx=5, pady=5)
         
-        ttk.Label(self.add_command_frame, text="Respuesta:").grid(row=1, column=0, padx=5, pady=5)
-        self.response_entry = ttk.Entry(self.add_command_frame)
-        self.response_entry.grid(row=1, column=1, padx=5, pady=5)
-        
-        ttk.Label(self.add_command_frame, text="Palabra Clave:").grid(row=2, column=0, padx=5, pady=5)
+        ttk.Label(self.add_command_frame, text="Palabra Clave:").grid(row=1, column=0, padx=5, pady=5)
         self.palabraClave_entry = ttk.Entry(self.add_command_frame)
-        self.palabraClave_entry.grid(row=2, column=1, padx=5, pady=5)
+        self.palabraClave_entry.grid(row=1, column=1, padx=5, pady=5)
         
         self.add_command_button = ttk.Button(self.add_command_frame, text="Agregar Comando", command=self.create_command)
-        self.add_command_button.grid(row=3, column=0, pady=10)
+        self.add_command_button.grid(row=2, column=0, pady=10)
         
         self.edit_command_button = ttk.Button(self.add_command_frame, text="Editar Comando", command=self.edit_command)
-        self.edit_command_button.grid(row=3, column=1, pady=10)
+        self.edit_command_button.grid(row=2, column=1, pady=10)
+
+        self.var1 = tk.BooleanVar()
+        self.caracter_checkbutton = tk.Checkbutton(self.add_command_frame, text="Caracter Inicial",variable=self.var1, command=self.check_caracter)
+        self.caracter_checkbutton.grid(row=0, column=2,pady=10)
+        self.caracter_entry = ttk.Entry(self.add_command_frame, state='disabled')
+        self.caracter_entry.grid(row=0,column=3,pady=10)
+
+
+        self.respueta_frame= ttk.Labelframe(self.add_command_frame, text="Respuesta:")
+        self.respueta_frame.grid(row=3, column=0, padx=5, pady=5,columnspan=3)
+
+        self.response_entry = tk.Text(self.respueta_frame, width=40, height=10)
+        self.response_entry.pack()
+
 
         # Lista de comandos
         self.commands_frame = ttk.LabelFrame(main_frame, text="Lista de Comandos")
-        self.commands_frame.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+        self.commands_frame.grid(row=0, column=0, rowspan=2, padx=0, pady=10, sticky='nsew')
         
+        self.commands_frame.grid_rowconfigure(0, weight=1)
+        self.commands_frame.grid_rowconfigure(1, weight=0)
+        self.commands_frame.grid_columnconfigure(0, weight=1)
+
         self.tree = ttk.Treeview(self.commands_frame, columns=('Nombre'), show='headings')
         self.tree.heading('Nombre', text='Nombre')
-        self.tree.grid(row=0, column=0, padx=5, pady=5)
+        self.tree.grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
+
         
         self.delete_command_button = ttk.Button(self.commands_frame, text="Eliminar Comando", command=self.delete_command)
         self.delete_command_button.grid(row=1, column=0, pady=10)
 
         self.view_commands()
-        
+        self.tree.bind("<Double-1>", self.on_double_click)
+        self.tree.bind("<Button-3>", self.on_right_click)
         #self.bot = comandosBot(self)
         #threading.Thread(target=self.bot.run).start()
         #self.commands = {}
+        self.menu = tk.Menu(root, tearoff=0)
+        self.menu.add_command(label="Editar Comando", command=self.edit_command)
+    def check_caracter(self):
+        if self.var1.get():
+             
+            self.caracter_entry.config( state='enable')
+        else:
+            self.caracter_entry.config(state='disable')
+    def prueba(sekf):
+         print("funca")
+    def on_double_click(self, event):
+        self.edit_command()
+    def on_right_click(self, event):
+        item = self.tree.identify_row(event.y)
+        if item:
+            self.tree.selection_set(item)
+            self.menu.post(event.x_root, event.y_root)
     def create_database(self):
         self.conn = sqlite3.connect('commands.db')
         self.cursor = self.conn.cursor()
@@ -109,8 +146,8 @@ class CommandApp:
 
     def create_command(self):
         name = self.name_entry.get()
-        response = self.response_entry.get()
         keyword = self.palabraClave_entry.get()
+        response = self.response_entry.get("1.0", tk.END)
     
         if name and response and keyword:
             try:
@@ -124,11 +161,6 @@ class CommandApp:
                 messagebox.showerror("Error", "El nombre del comando ya existe")
         else:
             messagebox.showerror("Error", "Todos los campos son obligatorios")
-
-    def clear_entries(self):
-        self.name_entry.delete(0, tk.END)
-        self.response_entry.delete(0, tk.END)
-        self.palabraClave_entry.delete(0, tk.END)
 
     def edit_command(self):
         selected_item = self.tree.selection()
@@ -158,10 +190,10 @@ class CommandApp:
         selected_item = self.tree.selection()
         if selected_item:
             item = self.tree.item(selected_item)
-            command_id = item['values'][0]
+            name = item['values'][0]
         
             if messagebox.askyesno("Confirmar", "¿Estás seguro de que quieres eliminar este comando?"):
-                self.cursor.execute("DELETE FROM commands WHERE id=?", (command_id,))
+                self.cursor.execute("DELETE FROM commands WHERE name=?", (name,))
                 self.conn.commit()
                 messagebox.showinfo("Éxito", "Comando eliminado correctamente")
                 self.view_commands()
@@ -194,7 +226,7 @@ class CommandApp:
             StopComandos()
             self.inicio_command_button.config(text="Iniciar")
         else:
-            p2 = subprocess.Popen(proceso2, shell=True)
+            p2 = subprocess.Popen(proceso3, shell=True)
             self.inicio_command_button.config(text="Parar")
     def add_command(self):
         name = self.name_entry.get()
@@ -206,40 +238,27 @@ class CommandApp:
         selected_item = self.tree.selection()
         if selected_item:
             item = self.tree.item(selected_item[0])
-            command_id = item['values'][0]
-            current_name = item['values'][1]
-            current_response = item['values'][2]
-            current_keyword = item['values'][3]
-
+            name = item['values'][0]
+            self.cursor.execute("SELECT * FROM commands WHERE name=?", (name,))
+            rows = self.cursor.fetchall()
         # Llenar los campos de entrada con los valores actuales
-            self.name_entry.delete(0, tk.END)
-            self.name_entry.insert(0, current_name)
-            self.response_entry.delete(0, tk.END)
-            self.response_entry.insert(0, current_response)
-            self.palabraClave_entry.delete(0, tk.END)
-            self.palabraClave_entry.insert(0, current_keyword)
+            for row in rows:
+                id = row[0]
+                self.clear_entries()
+                self.name_entry.insert(0,row[1])
+                self.palabraClave_entry.insert(0,row[3])
+                self.response_entry.insert(tk.END, row[2])
+            for row in rows: 
+                """ name)
+                self.response_entry.delete(0, row[1])
+                 row[2])
+                 row[3])
+            #self.palabraClave_entry.insert(0, current_keyword)"""
 
         # Función interna para realizar la actualización
-            
-            if self.name_entry and self.response_entry and self.palabraClave_entry:
-                try:
-                    self.cursor.execute("UPDATE commands SET name=?, response=?, keyword=? WHERE id=?",
-                                        (self.name_entry, self.response_entry, self.palabraClave_entry, command_id))
-                    self.conn.commit()
-                    messagebox.showinfo("Éxito", "Comando actualizado correctamente")
-                    self.clear_entries()
-                    self.view_commands()
-                except sqlite3.IntegrityError:
-                        messagebox.showerror("Error", "El nombre del comando ya existe")
-            else:
-                    messagebox.showerror("Error", "Todos los campos son obligatorios")
-
-        else:
-            messagebox.showerror("Error", "Selecciona un comando para editar")
-    
     def clear_entries(self):
         self.name_entry.delete(0, tk.END)
-        self.response_entry.delete(0, tk.END)
+        self.response_entry.delete(1.0, tk.END)
         self.palabraClave_entry.delete(0, tk.END)
     def ComandosCheck(self):
      
@@ -250,7 +269,8 @@ class CommandApp:
             notification.notify(
                 title="¡Ya esta iniciado los Comandos!",
                 message="¡Ya se conecto correctamente con " + CHANNEL,
-                app_name="PacoBot"
+                app_name="PacoBot",
+                app_icon='src/parametros/PacoBot.ico'
             )
             config.set('parametro', 'onoff_comandos', 'true')
             with open('src/parametros/archivo_parametros.ini', 'w') as archivo_parametros:
@@ -281,16 +301,26 @@ class comandosBot(commands.Bot):
         
         print("Comandos iniciado")
 
-    async def player_done(self):
-        print('Finished playing song!')
-
     async def event_message(self, message):
+        nick = message.author.name
+        print(nick , ": " , message.content)
+        
+        if not nick in Espectadores:
+
+            Espectadores.append(nick)
         config.read('src/parametros/archivo_parametros.ini')
         onoff_comandos= config.get('parametro','onoff_comandos' )
-        
-        if not onoff_comandos =="true" or message.echo:
+        if not onoff_comandos =="true" : 
              return
-        await self.handle_commands(message)
+        if  "!" in message.content.lower():
+            command = message.content.split()[0].lower()
+            self.cursor.execute("SELECT response FROM commands WHERE keyword=?", (command,))
+            result = self.cursor.fetchone()
+
+            if result:
+                # Si se encuentra el comando, envía la respuesta
+                await message.channel.send(result[0])
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         if "custom-reward-id=" in message.raw_data: 
             if "custom-reward-id=5e76d158-a1c2-4bcb-a197-b6f2c0595d6d" in message.raw_data:
@@ -300,6 +330,7 @@ class comandosBot(commands.Bot):
 
         if message.echo:
             return
+        
         if  "hola" in message.content.lower()  or  "buenas" in message.content.lower()  or  "hello" in message.content.lower():
             await self.reproducir_sonido('src/sonidos/buenas.wav')
         if  "gg" in message.content.lower():
@@ -309,15 +340,6 @@ class comandosBot(commands.Bot):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         await self.handle_commands(message)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    async def handle_commands(self, message):
-        # Busca el comando en la base de datos
-        command = message.content.split()[0].lower()  # Obtiene la primera palabra del mensaje
-        self.cursor.execute("SELECT response FROM commands WHERE name = ? OR keyword = ?", (command, command))
-        result = self.cursor.fetchone()
-
-        if result:
-            # Si se encuentra el comando, envía la respuesta
-            await message.channel.send(result[0])
     @commands.command()
     async def apoyo(self, ctx: commands.Context):
         await ctx.send(f'Podes ayudarme mediante este link: https://linktr.ee/mosteryn')
@@ -490,17 +512,16 @@ class comandosBot(commands.Bot):
             mensage = ctx.message.content[5:n]
             engine.say(ctx.author.name + " a cambiado la categoria a: " + mensage)
             engine.runAndWait()
+    
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
     async def reproducir_sonido(self, archivo):
-        config.read('parametros/archivo_parametros.ini')
-        volumen = float(config.get('parametro','volumenc' ))
+        config.read('src/parametros/archivo_parametros.ini')
+        volumen = float(CargarVolumenC())
         archivo_audio = archivo  
         sound = pygame.mixer.Sound(archivo_audio)
         sound.set_volume(volumen/100)
         sound.play()
+    def start(self):
+        self.run()
 # No ejecutar la interfaz gráfica si se importa este archivo
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = CommandApp(root)
-    root.mainloop()

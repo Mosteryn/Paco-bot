@@ -44,7 +44,7 @@ class ChatBot(commands.Bot):
         await self.handle_commands(message)
         config.read('src/parametros/archivo_parametros.ini')
         onoff_speed= config.get('parametro','onoff_speed' )
-        volumen = float(config.get('parametro','volumenS' ))
+        volumen = cargarVolumenS()
         
         
         self.app.update_chat(message.author.name, message.content, message.author.color)
@@ -86,8 +86,8 @@ class ChatApp:
         self.speedchat_frame = ttk.LabelFrame(self.left_frame, text="SpeedChat")
         self.speedchat_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
         ttk.Label(self.speedchat_frame, text="Volumen").grid(row=0, column=0, padx=10, pady=10, sticky="w")
-        self.speedchat_volume = ttk.Scale(self.speedchat_frame, from_=0, to=100, orient="horizontal",command= volumenS)
-        self.speedchat_volume.set(config.get('parametro','volumens'))
+        self.speedchat_volume = ttk.Scale(self.speedchat_frame, from_=0, to=100, orient="horizontal",command= editVolumenS)
+        self.speedchat_volume.set(cargarVolumenS())
         self.speedchat_volume.grid(row=0, column=1, padx=10, pady=10)
         self.inicio_speedchat_button = ttk.Button(self.speedchat_frame, text="Iniciar", command= self.speekChatCheck)
         self.inicio_speedchat_button.grid(row=0, column=2, padx=10, pady=10)

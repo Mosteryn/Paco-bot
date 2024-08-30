@@ -31,8 +31,8 @@ class GeneralApp:
         self.speedchat_frame = ttk.LabelFrame(root, text="SpeedChat")
         self.speedchat_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
         ttk.Label(self.speedchat_frame, text="Volumen").grid(row=0, column=0, padx=10, pady=10, sticky="w")
-        self.speedchat_volume = ttk.Scale(self.speedchat_frame, from_=0, to=100, orient="horizontal",command= volumenS)
-        self.speedchat_volume.set(config.get('parametro','volumens'))
+        self.speedchat_volume = ttk.Scale(self.speedchat_frame, from_=0, to=100, orient="horizontal",command= editVolumenS)
+        self.speedchat_volume.set(cargarVolumenS())
         self.speedchat_volume.grid(row=0, column=1, padx=10, pady=10)
         self.inicio_speedchat_button = ttk.Button(self.speedchat_frame, text="Iniciar", command= self.speekChatCheck)
         self.inicio_speedchat_button.grid(row=0, column=2, padx=10, pady=10)
@@ -40,8 +40,8 @@ class GeneralApp:
         self.comandos_frame = ttk.LabelFrame(root, text="Comandos")
         self.comandos_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
         ttk.Label(self.comandos_frame, text="Volumen").grid(row=0, column=0, padx=10, pady=10, sticky="w")
-        self.commands_volume = ttk.Scale(self.comandos_frame, from_=0, to=100, orient="horizontal", command= volumenC)
-        self.commands_volume.set(config.get('parametro','volumenc'))
+        self.commands_volume = ttk.Scale(self.comandos_frame, from_=0, to=100, orient="horizontal", command= editVolumenC)
+        self.commands_volume.set(CargarVolumenC())
         self.commands_volume.grid(row=0, column=1, padx=10, pady=10)
         self.inicio_command_button=ttk.Button(self.comandos_frame, text="Iniciar", command=self.ComandsCheck)
         self.inicio_command_button.grid(row=0, column=2, padx=10, pady=10)
@@ -49,45 +49,49 @@ class GeneralApp:
         ttk.Button(self.root, text="Salir", command=self.salir).grid(row=3, column=0, padx=10, pady=10)
 
     def speekChatCheck(self):
-     
-        """config.read('src/parametros/archivo_parametros.ini')
-        if config.get('parametro','onoff_speed' ) == 'false':
-            print("Comandos iniciado")
+        
+        config.read('src/parametros/archivo_parametros.ini')
+        onoff_speed= config.get('parametro','onoff_speed' )
+        CHANNEL= config.get('parametro', 'channel')
+        if onoff_speed == 'false':
+            print("SpeedChat iniciado")
+            notification.notify(
+                title="¡Ya esta iniciado El SpedChat!",
+                message="¡Ya se conecto correctamente con " + CHANNEL,
+                app_name="PacoBot"
+            )
             config.set('parametro', 'onoff_speed', 'true')
             with open('src/parametros/archivo_parametros.ini', 'w') as archivo_parametros:
                  config.write(archivo_parametros)
-            self.inicio_command_button.config(text="Parar")
-            notification.notify(
-                title="¡Ya esta iniciado los Comandos!",
-                message="¡Ya se conecto correctamente con " + config.get('parametro', 'channel'),
-                app_name="PacoBot"
-            )
-        else:
-            print("Comandos deteniendo")
-            config.set('parametro', 'onoff_speed', 'false')
-            with open('src/parametros/archivo_parametros.ini', 'w') as archivo_parametros:
-                 config.write(archivo_parametros)
-            self.inicio_command_button.config(text="Iniciar")"""
-    def ComandsCheck(self):
-     
-        config.read('src/parametros/archivo_parametros.ini')
-        """if config.get('parametro','onoff_comandos' ) == 'false':
-            print("SpeedChat iniciado")
-            config.set('parametro', 'onoff_comandos', 'true')
-            with open('src/parametros/archivo_parametros.ini', 'w') as archivo_parametros:
-                 config.write(archivo_parametros)
             self.inicio_speedchat_button.config(text="Parar")
-            notification.notify(
-                title="¡Ya esta iniciado El SpedChat!",
-                message="¡Ya se conecto correctamente con " + config.get('parametro', 'channel'),
-                app_name="PacoBot"
-            )
         else:
             print("SpeedChat deteniendo")
             config.set('parametro', 'onoff_speed', 'false')
             with open('src/parametros/archivo_parametros.ini', 'w') as archivo_parametros:
                  config.write(archivo_parametros)
-            self.inicio_speedchat_button.config(text="Iniciar")"""
+            self.inicio_speedchat_button.config(text="Iniciar")
+    def ComandsCheck(self):
+        
+        config.read('src/parametros/archivo_parametros.ini')
+        onoff_comandos = config.get('parametro','onoff_comandos' )
+        CHANNEL= config.get('parametro', 'channel')
+        if onoff_comandos == 'false':
+            print("Comandos iniciado")
+            notification.notify(
+                title="¡Ya esta iniciado los Comandos!",
+                message="¡Ya se conecto correctamente con " + CHANNEL,
+                app_name="PacoBot"
+            )
+            config.set('parametro', 'onoff_comandos', 'true')
+            with open('src/parametros/archivo_parametros.ini', 'w') as archivo_parametros:
+                 config.write(archivo_parametros)
+            self.inicio_command_button.config(text="Parar")
+        else:
+            print("Comandos deteniendo")
+            config.set('parametro', 'onoff_comandos', 'false')
+            with open('src/parametros/archivo_parametros.ini', 'w') as archivo_parametros:
+                 config.write(archivo_parametros)
+            self.inicio_command_button.config(text="Iniciar")
 
     def salir(self):
         # Detiene ambos procesos antes de salir del programa

@@ -6,6 +6,7 @@ from src.Chat import ChatApp
 import threading
 import configparser
 import multiprocessing
+from src.funciones import *
 
 config = configparser.ConfigParser()
 # config.read('src/parametros/archivo_parametros.ini')
@@ -14,9 +15,10 @@ class MainApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Interfaz Principal")
+        
         # Crear el Notebook
         notebook = ttk.Notebook(root)
-        notebook.pack(pady=10, expand=True)
+        notebook.pack(expand=True, fill='both')
         # Crear los frames
         self.command_app_frame = ttk.Frame(notebook)
         self.general_app_frame = ttk.Frame(notebook)
@@ -39,12 +41,19 @@ class MainApp:
         config.read('src/parametros/archivo_parametros.ini')
         onoff_speed = config.get('parametro', 'onoff_speed')
         onoff_comandos = config.get('parametro', 'onoff_comandos')
+        #onoff_comandos = config.get('parametro', 'onoff_comandos')
         if onoff_speed == 'true':
             self.chat_app.inicio_speedchat_button.config(text="Parar")
             self.general_app.inicio_speedchat_button.config(text="Parar")
         else:
             self.chat_app.inicio_speedchat_button.config(text="Iniciar")
             self.general_app.inicio_speedchat_button.config(text="Iniciar")
+        if onoff_comandos == 'true': 
+            self.command_app.inicio_command_button.config(text="Parar")
+            self.general_app.inicio_command_button.config(text="Parar")
+        else: 
+            self.command_app.inicio_command_button.config(text="Inicio")
+            self.general_app.inicio_command_button.config(text="Inicio")
         
         vc1 = self.general_app.commands_volume.get()
         vc2 = self.command_app.commands_volume.get()
@@ -53,8 +62,8 @@ class MainApp:
 
         if vc1 != vc2:
             config.read('src/parametros/archivo_parametros.ini')
-            self.general_app.commands_volume.set(config.get('parametro', 'volumenc'))
-            self.command_app.commands_volume.set(config.get('parametro', 'volumenc'))
+            self.general_app.commands_volume.set(CargarVolumenC())
+            self.command_app.commands_volume.set(CargarVolumenC())
         
         vs1 = self.general_app.speedchat_volume.get()
         vs2 = self.chat_app.speedchat_volume.get()
