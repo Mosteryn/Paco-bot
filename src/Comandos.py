@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
+from tkinter import filedialog
 import psutil
 import configparser
 from src.funciones import *
@@ -43,13 +44,13 @@ class CommandApp:
         # Frame principal
         main_frame = ttk.Frame(root)
         main_frame.pack(expand=True, fill='both')
-        main_frame.grid_rowconfigure(0, weight=0)  
-        main_frame.grid_rowconfigure(1, weight=1)  
+        main_frame.grid_rowconfigure(0, weight=0)
+        main_frame.grid_rowconfigure(1, weight=1)
         main_frame.grid_columnconfigure(0, weight=0)  
         main_frame.grid_columnconfigure(1, weight=1)  
         
 
-        # Sección de comandos
+        # Sección de comandos General
         self.comandos_frame = ttk.LabelFrame(main_frame, text="Comandos")
         self.comandos_frame.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
         ttk.Label(self.comandos_frame, text="Volumen").grid(row=0, column=0, padx=10, pady=10, sticky="w")
@@ -63,8 +64,6 @@ class CommandApp:
         self.add_command_frame = ttk.LabelFrame(main_frame, text="Agregar/Editar Comando")
         self.add_command_frame.grid(row=1, column=1, padx=10, pady=10, sticky='nsew')
 
-        
-
         ttk.Label(self.add_command_frame, text="Nombre del Comando:").grid(row=0, column=0, padx=5, pady=5)
         self.name_entry = ttk.Entry(self.add_command_frame)
         self.name_entry.grid(row=0, column=1, padx=5, pady=5)
@@ -73,18 +72,22 @@ class CommandApp:
         self.palabraClave_entry = ttk.Entry(self.add_command_frame)
         self.palabraClave_entry.grid(row=1, column=1, padx=5, pady=5)
         
-        self.add_command_button = ttk.Button(self.add_command_frame, text="Agregar Comando", command=self.create_command)
-        self.add_command_button.grid(row=2, column=0, pady=10)
-        
-        self.edit_command_button = ttk.Button(self.add_command_frame, text="Editar Comando", command=self.edit_command)
-        self.edit_command_button.grid(row=2, column=1, pady=10)
-
         self.var1 = tk.BooleanVar()
         self.caracter_checkbutton = tk.Checkbutton(self.add_command_frame, text="Caracter Inicial",variable=self.var1, command=self.check_caracter)
         self.caracter_checkbutton.grid(row=0, column=2,pady=10)
         self.caracter_entry = ttk.Entry(self.add_command_frame, state='disabled')
         self.caracter_entry.grid(row=0,column=3,pady=10)
 
+        self.sonido_label = ttk.Label(self.add_command_frame, text=("Sonido:"))
+        self.sonido_label.grid(row=1,column=2,pady=10)
+        self.sonido_boton = ttk.Button(self.add_command_frame, text= "Seleccione", command=self.seleccionSonido)
+        self.sonido_boton.grid(row=1,column=3,pady=10)
+
+        self.add_command_button = ttk.Button(self.add_command_frame, text="Agregar Comando", command=self.create_command)
+        self.add_command_button.grid(row=2, column=0, pady=10)
+        
+        self.edit_command_button = ttk.Button(self.add_command_frame, text="Editar Comando", command=self.edit_command)
+        self.edit_command_button.grid(row=2, column=1, pady=10)
 
         self.respueta_frame= ttk.Labelframe(self.add_command_frame, text="Respuesta:")
         self.respueta_frame.grid(row=3, column=0, padx=5, pady=5,columnspan=3)
@@ -123,6 +126,14 @@ class CommandApp:
             self.caracter_entry.config( state='enable')
         else:
             self.caracter_entry.config(state='disable')
+    def seleccionSonido(self):
+        #esta funcion permite la seleccion del archovo y cambia el label de sonido 
+        filepath = filedialog.askopenfilename()
+        filename = os.path.basename(filepath)
+
+        self.sonido_label.config(text="Sonido:"+ filename)
+
+
     def prueba(sekf):
          print("funca")
     def on_double_click(self, event):
@@ -162,7 +173,7 @@ class CommandApp:
         else:
             messagebox.showerror("Error", "Todos los campos son obligatorios")
 
-    def edit_command(self):
+    def UPDATE_command(self):
         selected_item = self.tree.selection()
         if selected_item:
             item = self.tree.item(selected_item)
@@ -204,6 +215,8 @@ class CommandApp:
             self.tree.delete(i)
     
         self.cursor.execute("SELECT name FROM commands")
+        self.tree.insert('', 'end', values=("Nuevo Comando"))
+
         for row in self.cursor.fetchall():
             self.tree.insert('', 'end', values=row)
 
@@ -236,7 +249,13 @@ class CommandApp:
     
     def edit_command(self):
         selected_item = self.tree.selection()
+        
+        
         if selected_item:
+            posicion = self.tree.index(selected_item[0])
+            if posicion == 0: 
+                self.clear_entries()
+                return
             item = self.tree.item(selected_item[0])
             name = item['values'][0]
             self.cursor.execute("SELECT * FROM commands WHERE name=?", (name,))
